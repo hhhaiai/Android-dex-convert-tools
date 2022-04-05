@@ -1,0 +1,60 @@
+Dalvik, Art，JIT ,AOT, oat, dex, odex概念:
+
+执行环境Dalvik, Art
+Dalvik这个大家肯定很熟悉 Dalvik是Google公司设计用于Android平台的Java虚拟机 Art是(Android runtime) 在Android系统4.4提出 在5.0之后完全弃用Dalvik 全部采用Art为执行环境在Dalvik下，应用每次运行的时候，字节码都需要通过即时编译器（JIT）转换为机器码，这会拖慢应用的运行效率，而在ART环境中，应用在第一次安装的时候，字节码就会预先编译成机器码（这种机制称为AOT） 这样的话，应用执行变得更加快速。
+
+编译模式 JIT，AOT
+上述提到的两种编译模式JIT 和AOT，可以理解为是一种编译策略 
+JIT (just in time)运行时编译 
+AOT (Ahead-Of-Time)运行前编译 
+Art的主要特征就是AOT文件格式oat,dex和odex
+
+dex（Dalvik Executable）格式是专门为Dalvik设计的一种压缩格式，(javac)(dx工具).java------>.class------->.dex.java文件经过javac编译器生成.class字节码 再经过。dx工具生成.dex
+
+odex(optimized dex)即优化的dex对于在dalvik环境中 使用dexopt来对dex字节码进行优化 生成odex文件 最终存在手机的data/dalvik-cache目录下
+对于art环境，使用dex2oat工具来对dex字节码生成oat文件
+
+oat文件是art的核心，oat文件包含oatdata和oatexec前者包含dex文件内容，后者包含生成的本地机器指令，进而可以直接运行,同样保存在手机的data/dalvik-cache目录下PMS(PackgetManagerService)--->installd(守护进程)------>dex2oat(/system/bin/dex2oat)
+
+注意存放在data/dalvik-cache目录下的后缀名都仍为.dex 
+前者其实表示一个优化过的.dex文件 
+后者为.oat文件apk
+
+安装过程大家都知道apk其实就是zip包 apk安装过程其实就是解压过程用户应用安装涉及以下几个目录
+data/app 安装目录 安装时会把apk文件copy到这里
+data/dalvik-cache 如上述描述中的存放.dex(.odex 无论davilk的dex 还是art的oat格式)
+data/data/pkg/ 存放应用程序的数据
+
+安装APK的过程，其实是安装包解压的过程。资源文件、二进制库等解压后直接存储在本地，DEX文件不仅仅解压，会根据系统的运行环境，采用不同的处理方式，被处理成不同格式的文件存储在本地，等待程序启动调用，这样就完成了应用的安装过程。
+
+APK是Android安装包，Dalvik和ART都是Android运行环境，ART是在高版本手机上替换Dalvik的。dex文件是源代码编译后打包生成的文件，是APK的一个组成部分，安装时Dalvik将dex文件中可执行文件class.dex解压存储在本地的文件就是ODEX文件。ART运行生成的文件是OAT。  
+
+odex与oat的区别 
+Dalvik与ART比较：
+（1）Dalvik和ART是Android平台实现的JAVA虚拟机。用于解析DEX文件、ODEX文件和OAT文件。
+（2）ART解析模式是Android应用在安装后，会进行一次预编译，将应用安装包中的字节码转换成机器语言存储在本地。
+（3）Dalvik解析模式是在应用安装后，直接将字节码存储起来，每次运行时，需要将代码编译成机器语言。
+（4）运行程序时，Dalvik比ART慢，ART安装后应用所占的空间更大，安装时间长。 
+
+ODEX文件与OAT文件比较：
+（1）Dalvik将APK中的内容转化成ODEX，ART将其转化成OAT。
+（2）ODEX需要通过JIT进行优化，提高运行效率。
+（3）OAT包含DEX文件和编译出的本地机器指令文件，比ODEX文件占用空间大，不需要经过处理就可以直接运行，运行速度快。 
+
+小结：
+从安装过程上来看
+Java的代码实际上需要两次“转换”才可以在android设备上运行
+一.PC端：.class->.dex->.apk
+二.phone:dex->odex
+
+区别在于第二步。
+ART : .dex->.odex(机器码)（AOT　　Ahead-Of-Time）
+Dalvik: .dex->.odex(字节码)（JIT　Just-In-Time）
+机器码可直接执行，而字节码每次启动都需要执行将优化过的odex字节码再转换成机器码
+
+ART优缺点
+系统性能大幅提升
+App启动、运行更快
+减少每次启动的编译增加电池续航
+存储占用更大
+安装时间更长
