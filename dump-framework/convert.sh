@@ -16,12 +16,15 @@ adb pull /system/framework $framework_dex_dir
 
 mkdir $convert_temp_dir
 
-echo "============从 vdex 中提取 dex==========="
+
 files=`find "$framework_dex_dir" -name "*.vdex" -o -name "*.ovdex"`
+echo "============从 vdex 中提取 dex: find $framework_dex_dir -name *.vdex -o -name *.ovdex==========="
+
 for file in $files
 do
 	echo "vdex->cdex: $file"
 	./vdexExtractor -i "$file" -o $convert_temp_dir
+	# echo "单句: ./vdexExtractor -i "$file" -o $convert_temp_dir"
 done
 
 echo "===============将 cdex 转为标准的 dex==========="

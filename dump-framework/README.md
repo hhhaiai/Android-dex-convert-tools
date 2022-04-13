@@ -6,6 +6,11 @@
 
 
 
-1.   adb pull /system/framework framework/
+1.   导出: adb pull /system/framework framework/
+2.   `vdex`转``cdex`:  ./vdexExtractor -i framework/am.vdex  -o x/
+2.   `cdex`转`dex`:./cdexExtract/bin/compact_dex_converter -w x x/am_classes.cdex
 
-2.   
+
+
+*   cdexExtract:
+*   vdexExtractor: https://github.com/anestisb/vdexExtractor.git
