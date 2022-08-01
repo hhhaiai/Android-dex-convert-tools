@@ -1,0 +1,1 @@
+smalidea has been split out into its own repository. See the [README](https://github.com/JesusFreke/smalidea) there.
